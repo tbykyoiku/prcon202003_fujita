@@ -1,0 +1,152 @@
+<!-- 第3回PGコンテスト用ベースすごろくプログラム -->
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="utf-8">
+<title>すごろくゲーム</title>
+<style>
+body {
+      background: linear-gradient(#93B874 10%, #C9DCB9 70%, #C9DCB9 90%);
+     }
+  </style>      
+</head>
+
+<body>
+<h1>すごろくゲーム</h1>
+<h3>※2人以上でお遊びください<h3>
+<hr>
+<form name="form1">
+  <table border="20" cellspacing="10" cellpadding="10">
+    <tr>
+      <td><input name="player0" type="text" size="20" value="名前を入力"></td>
+      <td><input name="btn0" type="button" value="サイコロ" onClick="getNum(0)"></td>
+      <td><div id="sai0"></div></td>
+      <td><div id="brd0"></div></td>
+    </tr>
+    <tr>
+      <td><input name="player1" type="text" size="20"></td>
+      <td><input name="btn1" type="button" value="サイコロ" onClick="getNum(1)"></td>
+      <td><div id="sai1"></div></td>
+      <td><div id="brd1"></div></td>
+    </tr>
+    <tr>
+      <td><input name="player2" type="text" size="20"></td>
+      <td><input name="btn2" type="button" value="サイコロ" onClick="getNum(2)"></td>
+      <td><div id="sai2"></div></td>
+      <td><div id="brd2"></div></td>
+    </tr>
+    <tr>
+      <td><input name="player3" type="text" size="20"></td>
+      <td><input name="btn3" type="button" value="サイコロ" onClick="getNum(3)"></td>
+      <td><div id="sai3"></div></td>
+      <td><div id="brd3"></div></td>
+    </tr>
+  </table>
+</form>
+
+<script language="javascript">
+//コマ
+img = new Array("★","◆","●","■");
+//移動跡
+ato =  "□";
+//イベント（コマ数は自動取得）
+ev = new Array(0,0,2,0,5,0,-3,-99,0,3,0,-2,2,-5,0,-2,0,2,-99,0,3,-3,0,5,0,-3,-2,0,2,0,3,0,2,0,-3,2,0,-2,0,5,0,-3,0,-2,0,0,-3,0,0);
+
+//以下は変更不可
+koma = new Array();
+goal = ev.length+1;
+player_num = 0;
+pre_num = 0;
+pre_r = 0;
+timer = 0;
+
+restart();
+
+function restart() {
+	for (i=0; i<4; i++) {
+		document.getElementById("brd"+i).innerHTML = img[i];
+		koma[i] = 0;
+	}
+
+	sai_reset();
+}
+
+function getNum(num) {
+	if (document.form1.elements["player"+num].value == "") r = 0;
+	clearTimeout(timer);
+	document.getElementById("sai"+pre_num).innerHTML = pre_r;
+	pre_num = num;
+	pre_r = r;
+	document.getElementById("sai"+num).innerHTML = "<font color='#FF0000'>" + r + "</font>";
+	koma[num] += r;
+	move_koma();
+	check_event();
+	sai_next();
+}
+
+function check_event() {
+	var n = ev[koma[pre_num]-1];
+	var s = "";
+	if (n) {
+		koma[pre_num] += n;
+		if (koma[pre_num] <= 0) {
+			s = "スタートに戻る";
+			koma[pre_num] = 0;
+		} else {
+			if (n > 0) s = n+"マス進む";
+			if (n < 0) s = n*-1+"マス戻る";
+		}
+		if (s != "") {
+			alert(img[pre_num] + document.form1.elements["player"+pre_num].value + "さん\n" + s);
+			move_koma();
+		}
+	}
+}
+
+function move_koma() {
+	var s = "";
+	for (i=0; i<koma[pre_num]; i++) {
+		s += ato;
+	}
+	document.getElementById("brd"+pre_num).innerHTML = s + img[pre_num];
+	//document.getElementById("brd"+pre_num).innerHTML = s + img[pre_num] + "(" + koma[pre_num] + ")";
+}
+
+function goalin() {
+	alert("ゴール！！\n優勝は" + img[player_num] + document.form1.elements["player"+pre_num].value + "さんです。");
+	if (player_num == pre_num) pre_r = 0;
+	restart();
+}
+
+function sai_next() {
+	player_num++;
+	if (player_num == 4) player_num = 0;
+	var s = document.form1.elements["player"+player_num].value;
+	if (s == "" && player_num != pre_num) {
+		sai_next();
+	} else {
+		if (koma[pre_num] < goal) {
+			sai_reset();
+		} else {
+			goalin();
+		}
+	}
+}
+
+function sai_reset() {
+	document.form1.btn0.disabled = true;
+	document.form1.btn1.disabled = true;
+	document.form1.btn2.disabled = true;
+	document.form1.btn3.disabled = true;
+	document.form1.elements["btn"+player_num].disabled = false;
+	sai_start();
+}
+
+function sai_start() {
+	r = Math.floor(Math.random() * 6) + 1;
+	if (player_num != pre_num || pre_r == 0) document.getElementById("sai"+player_num).innerHTML = r; 
+	timer = setTimeout("sai_start()",100);
+}
+</script>
+</body>
+</html>
